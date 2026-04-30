@@ -6,6 +6,7 @@ export default function MapCanvas({
   pois,
   routePoints,
   highlight,
+  heightClassName = "h-[55vh] min-h-[360px]",
 }) {
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
@@ -189,19 +190,19 @@ export default function MapCanvas({
       <div className="absolute right-3 top-3 z-10 flex gap-2">
         <button
           onClick={zoomIn}
-          className="rounded-lg border border-slate-200 bg-white/90 px-3 py-2 text-sm font-medium text-slate-700 shadow"
+          className="rounded-lg border border-slate-200 bg-white/90 px-2.5 py-1.5 text-sm font-medium text-slate-700 shadow-sm"
         >
           +
         </button>
         <button
           onClick={zoomOut}
-          className="rounded-lg border border-slate-200 bg-white/90 px-3 py-2 text-sm font-medium text-slate-700 shadow"
+          className="rounded-lg border border-slate-200 bg-white/90 px-2.5 py-1.5 text-sm font-medium text-slate-700 shadow-sm"
         >
           -
         </button>
         <button
           onClick={resetView}
-          className="rounded-lg border border-slate-200 bg-white/90 px-3 py-2 text-sm font-medium text-slate-700 shadow"
+          className="rounded-lg border border-slate-200 bg-white/90 px-2.5 py-1.5 text-sm font-medium text-slate-700 shadow-sm"
         >
           Reset
         </button>
@@ -209,7 +210,7 @@ export default function MapCanvas({
 
       <div
         ref={wrapRef}
-        className="h-[55vh] min-h-[360px] w-full overflow-hidden rounded-2xl bg-slate-950"
+        className={`${heightClassName} w-full overflow-hidden rounded-2xl bg-slate-950`}
         onWheel={handleWheel}
       >
         <canvas

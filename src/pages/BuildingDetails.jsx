@@ -1,24 +1,38 @@
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import AdminSidebar from "../components/AdminSidebar";
 import AppShell from "../components/AppShell";
 import { EmptyState } from "../components/PageState";
+import AdminMobileBar from "../components/admin/AdminMobileBar";
+import AdminMobileMenu from "../components/admin/AdminMobileMenu";
 import { useTheme } from "../context/ThemeContext";
-import { demoBuildings } from "../data/demoBuildings";
+import { demoBuildings, demoFloors } from "../data/demoBuildings";
 
 export default function BuildingDetails() {
-  const { darkMode } = useTheme();
+  useTheme();
   const { buildingId } = useParams();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const building = demoBuildings.find((item) => item.id === buildingId);
+  const firstFloor = useMemo(
+    () => demoFloors.find((item) => item.buildingId === buildingId),
+    [buildingId]
+  );
 
-  const cardClasses = darkMode
-    ? "rounded-2xl border border-slate-800 bg-slate-900"
-    : "rounded-2xl border border-slate-200 bg-white shadow-sm";
+  const cardClasses = "rounded-2xl border border-[#dde3ec] bg-white shadow-sm";
 
   return (
-    <AppShell darkMode={darkMode}>
+    <AppShell
+      darkMode={false}
+      sidebar={<AdminSidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />}
+    >
+      <AdminMobileMenu open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} darkMode={false} />
+      <AdminMobileBar title="Building Details" onOpenMenu={() => setMobileMenuOpen(true)} />
+
       <div className="mb-4 flex items-center justify-between">
         <Link
           to="/dashboard"
-          className={darkMode ? "text-sm text-slate-300" : "text-sm text-slate-600"}
+          className="text-sm text-slate-600"
         >
           Back to dashboard
         </Link>
@@ -37,7 +51,7 @@ export default function BuildingDetails() {
                 <h1 className="text-2xl font-semibold">{building.name}</h1>
                 <p
                   className={
-                    darkMode ? "mt-2 text-sm text-slate-400" : "mt-2 text-sm text-slate-600"
+                  "mt-2 text-sm text-slate-600"
                   }
                 >
                   {building.description}
@@ -56,22 +70,22 @@ export default function BuildingDetails() {
             </div>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              <div className={darkMode ? "rounded-xl bg-slate-950 p-4" : "rounded-xl bg-slate-50 p-4"}>
-                <div className={darkMode ? "text-xs text-slate-400" : "text-xs text-slate-500"}>
+              <div className="rounded-xl bg-[#f7f9fc] p-4">
+                <div className="text-xs text-slate-500">
                   Floors
                 </div>
                 <div className="mt-1 text-xl font-semibold">{building.floors}</div>
               </div>
 
-              <div className={darkMode ? "rounded-xl bg-slate-950 p-4" : "rounded-xl bg-slate-50 p-4"}>
-                <div className={darkMode ? "text-xs text-slate-400" : "text-xs text-slate-500"}>
+              <div className="rounded-xl bg-[#f7f9fc] p-4">
+                <div className="text-xs text-slate-500">
                   POIs
                 </div>
                 <div className="mt-1 text-xl font-semibold">{building.pois}</div>
               </div>
 
-              <div className={darkMode ? "rounded-xl bg-slate-950 p-4" : "rounded-xl bg-slate-50 p-4"}>
-                <div className={darkMode ? "text-xs text-slate-400" : "text-xs text-slate-500"}>
+              <div className="rounded-xl bg-[#f7f9fc] p-4">
+                <div className="text-xs text-slate-500">
                   Last Updated
                 </div>
                 <div className="mt-1 text-sm font-semibold">{building.updated}</div>
@@ -85,20 +99,20 @@ export default function BuildingDetails() {
               <Link
                 to="/dashboard/floors"
                 className={
-                  darkMode
-                    ? "block rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
-                    : "block rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  "block rounded-xl border border-[#dde3ec] bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-[#f7f9fc]"
                 }
               >
                 Manage Floors
               </Link>
 
               <Link
-                to="/demo/map"
+                to={
+                  firstFloor
+                    ? `/demo/map/${firstFloor.buildingId}/${firstFloor.id}`
+                    : "/demo/map"
+                }
                 className={
-                  darkMode
-                    ? "block rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
-                    : "block rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  "block rounded-xl border border-[#dde3ec] bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-[#f7f9fc]"
                 }
               >
                 Open Demo Map

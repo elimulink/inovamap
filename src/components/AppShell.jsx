@@ -6,6 +6,8 @@ export default function AppShell({
   rightSlot,
   darkMode = false,
   showHeader = true,
+  showThemeToggle = true,
+  headerClassName = "",
   maxWidth = "max-w-7xl",
   sidebar = null,
   contentClassName = "",
@@ -21,11 +23,11 @@ export default function AppShell({
   return (
     <div className={pageClasses}>
       {showHeader && !sidebar ? (
-        <header className={headerClasses}>
-          <div className={`mx-auto flex ${maxWidth} items-center justify-between px-4 py-4 sm:px-6 lg:px-8`}>
+        <header className={`${headerClasses} ${headerClassName}`}>
+          <div className={`mx-auto flex ${maxWidth} items-center justify-between px-4 py-3 sm:px-5 sm:py-3.5 lg:px-6 lg:py-4`}>
             <BrandLogo dark={darkMode} />
             <div className="flex items-center gap-2">
-              <ThemeToggle />
+              {showThemeToggle ? <ThemeToggle /> : null}
               {rightSlot}
             </div>
           </div>
@@ -35,12 +37,12 @@ export default function AppShell({
       {sidebar ? (
         <div className="flex min-h-screen">
           {sidebar}
-          <main className={`min-w-0 flex-1 px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6 ${contentClassName}`}>
+          <main className={`min-w-0 flex-1 px-3.5 py-3.5 sm:px-4.5 sm:py-4.5 lg:px-5 lg:py-5 ${contentClassName}`}>
             {children}
           </main>
         </div>
       ) : (
-        <main className={`mx-auto ${maxWidth} px-4 py-6 sm:px-6 lg:px-8 ${contentClassName}`}>
+        <main className={`mx-auto ${maxWidth} px-4 py-5 sm:px-5 sm:py-5.5 lg:px-6 lg:py-6 ${contentClassName}`}>
           {children}
         </main>
       )}

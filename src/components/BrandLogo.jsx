@@ -8,14 +8,15 @@ export default function BrandLogo({
   sidebar = false,
 }) {
   const subtitleClasses = dark ? "text-slate-400" : "text-slate-500";
+  const logoSizeClasses = sidebar ? "h-8 w-auto object-contain" : "h-9 w-auto object-contain";
 
   return (
-    <Link to={to} className={`inline-flex items-center gap-3 ${className}`}>
-      <div className={sidebar ? "rounded-xl bg-white p-2" : dark ? "rounded-xl bg-white p-2" : "rounded-xl bg-white p-2 shadow-sm"}>
+    <Link to={to} className={`inline-flex items-center gap-2.5 ${className}`}>
+      <div className="shrink-0">
         <img
           src="/inovamap-logo.png"
           alt="InovaMap"
-          className={sidebar ? "h-8 w-auto object-contain" : "h-8 w-auto object-contain"}
+          className={logoSizeClasses}
           onError={(e) => {
             e.currentTarget.style.display = "none";
             e.currentTarget.parentElement.innerHTML =
@@ -26,7 +27,7 @@ export default function BrandLogo({
 
       {!compact && (
         <div className="leading-tight">
-          <div className="text-base font-semibold">InovaMap</div>
+          <div className="text-[15px] font-semibold tracking-tight">InovaMap</div>
           <div className={`text-xs ${subtitleClasses}`}>Indoor Navigation Platform</div>
         </div>
       )}

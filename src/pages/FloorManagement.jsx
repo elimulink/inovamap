@@ -1,87 +1,141 @@
-import { Link } from "react-router-dom";
-import AppShell from "../components/AppShell";
-import { useTheme } from "../context/ThemeContext";
-
-const floors = [
-  { id: "ground", name: "Ground Floor", building: "Central Mall", status: "Mapped" },
-  { id: "first", name: "First Floor", building: "Central Mall", status: "Mapped" },
-  { id: "second", name: "Second Floor", building: "City Hospital", status: "Draft" },
-];
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import FloorDetailsModal from "../components/floors/FloorDetailsModal";
+import FloorDraftList from "../components/floors/FloorDraftList";
+import {
+  DEFAULT_FLOOR_FORM,
+  createFloorDraft,
+} from "../lib/floorSchema";
+import {
+  deleteFloorDraft,
+  getFloorDrafts,
+  upsertFloorDraft,
+} from "../lib/floorDraftStorage";
 
 export default function FloorManagement() {
-  const { darkMode } = useTheme();
+  const navigate = useNavigate();
 
-  const cardClasses = darkMode
-    ? "rounded-2xl border border-slate-800 bg-slate-900"
-    : "rounded-2xl border border-slate-200 bg-white shadow-sm";
+  const [drafts, setDrafts] = useState(() => getFloorDrafts());
+  const [modalOpen, setModalOpen] = useState(false);
+  const [activeDraft, setActiveDraft] = useState(DEFAULT_FLOOR_FORM);
+
+  const refreshDrafts = () => setDrafts(getFloorDrafts());
+
+  const readImageDimensions = (file, dataUrl) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+
+      img.onload = () => {
+        resolve({
+          imageWidthPixels: img.naturalWidth,
+          imageHeightPixels: img.naturalHeight,
+          uploadedImageUrl: dataUrl,
+          originalFileName: file.name,
+        });
+      };
+
+      img.src = dataUrl;
+    });
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = async () => {
+      const dataUrl = reader.result;
+      const imageMeta = await readImageDimensions(file, dataUrl);
+
+      setActiveDraft({
+        ...DEFAULT_FLOOR_FORM,
+        ...imageMeta,
+        buildingName: "Sarit Centre",
+        floorName: "Ground Floor",
+        floorNumber: "G",
+      });
+
+      setModalOpen(true);
+      event.target.value = "";
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const handleSave = (form) => {
+    const saved = upsertFloorDraft(createFloorDraft(form));
+    refreshDrafts();
+    setModalOpen(false);
+    setActiveDraft(saved);
+  };
+
+  const handleEdit = (floor) => {
+    setActiveDraft(floor);
+    setModalOpen(true);
+  };
+
+  const handleDelete = (id) => {
+    const confirmed = window.confirm("Delete this floor draft?");
+    if (!confirmed) return;
+
+    deleteFloorDraft(id);
+    refreshDrafts();
+  };
+
+  const handleOpen = (floor) => {
+    navigate(`/dashboard/map-editor/${floor.id}`);
+  };
 
   return (
-    <AppShell darkMode={darkMode}>
-      <div className="mb-4 flex items-center justify-between">
-        <Link
-          to="/dashboard"
-          className={darkMode ? "text-sm text-slate-300" : "text-sm text-slate-600"}
-        >
-          Back to dashboard
-        </Link>
-      </div>
-
-      <section className={`${cardClasses} p-5`}>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">Floor Management</h1>
-            <p className={darkMode ? "mt-1 text-sm text-slate-400" : "mt-1 text-sm text-slate-600"}>
-              Manage floor structure, readiness, and future map uploads.
-            </p>
-          </div>
-
-          <button
-            className={
-              darkMode
-                ? "rounded-xl border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-                : "rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            }
-          >
-            Add Floor
-          </button>
+    <main className="floor-page">
+      <section className="floor-page-header">
+        <div>
+          <p className="eyebrow">Admin / Floors</p>
+          <h1>Floor Management</h1>
+          <p>
+            Upload a floor map, enter calibration details, and prepare it for POIs,
+            routing nodes, and user navigation.
+          </p>
         </div>
 
-        <div className="mt-6 space-y-3">
-          {floors.map((floor) => (
-            <div
-              key={floor.id}
-              className={
-                darkMode
-                  ? "rounded-xl border border-slate-800 bg-slate-950 p-4"
-                  : "rounded-xl border border-slate-200 bg-slate-50 p-4"
-              }
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="font-semibold">{floor.name}</div>
-                  <div
-                    className={
-                      darkMode ? "mt-1 text-sm text-slate-400" : "mt-1 text-sm text-slate-600"
-                    }
-                  >
-                    {floor.building}
-                  </div>
-                </div>
+        <label className="upload-btn">
+          Upload Floor Map
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/jpg,image/webp"
+            onChange={handleImageUpload}
+            hidden
+          />
+        </label>
+      </section>
 
-                <span
-                  className={
-                    floor.status === "Mapped"
-                      ? "rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700"
-                      : "rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700"
-                  }
-                >
-                  {floor.status}
-                </span>
-              </div>
-            </div>
-          ))}
+      <section className="floor-info-card">
+        <h2>Current onboarding flow</h2>
+        <div className="flow-steps">
+          <span>1. Upload floor image</span>
+          <span>2. Fill floor details</span>
+          <span>3. Save draft locally</span>
+          <span>4. Open in map editor</span>
+          <span>5. Add POIs later</span>
+          <span>6. Add nodes/edges later</span>
         </div>
       </section>
-    </AppShell>
+
+      <FloorDraftList
+        drafts={drafts}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onOpen={handleOpen}
+      />
+
+      <FloorDetailsModal
+        key={modalOpen ? activeDraft.id || activeDraft.uploadedImageUrl || "new" : "closed"}
+        open={modalOpen}
+        initialValue={activeDraft}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSave}
+      />
+    </main>
   );
 }
